@@ -1,6 +1,6 @@
 # 📚 Swift Data Structure and Algorithms
 
-<img src="https://m.media-amazon.com/images/I/717WLc2DO5L._SL1360_.jpg" alt="책 표지" width="300">
+<img src="https://m.media-amazon.com/images/I/717WLc2DO5L._SL1360_.jpg" alt="책 표지" width="500">
 
 ## 📖 소개
 
