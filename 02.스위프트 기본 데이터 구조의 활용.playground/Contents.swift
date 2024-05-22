@@ -1,119 +1,226 @@
 import UIKit
 
 /*
- 스위프트는 강력한 언어임이 틀림없지만, 아무리 강력한 언어라 하더라도 그에 걸맞는 강력한 표준 라이브러리가 없다면 무용지물이다.
- 스위프트의 표준 라이브러리는 데이터 타입, 컬렉션 타입, 함수와 메소드, 그리고 다양한 목적에 부합하는 다수의 프로토콜 등 애플리케이션 개발을 위한 각종 구현 요소를 제공한다.
- 이번 장에서는 스위프트의 표준 라이브러리를 심도있게 살펴볼 것이다. 특히, 배열, 딕셔너리, 세트, 튜플 등 컬렉션 타입을 매우 상세하게 소개한다.
- */
+스위프트는 강력한 언어임이 틀림없지만, 아무리 강력한 언어라 하더라도 그에 걸맞는 강력한 표준 라이브러리가 없다면 무용지물입니다. 스위프트의 표준 라이브러리는 데이터 타입, 컬렉션 타입, 함수와 메소드, 그리고 다양한 목적에 부합하는 다수의 프로토콜 등 애플리케이션 개발을 위한 각종 구현 요소를 제공합니다. 이번 장에서는 스위프트의 표준 라이브러리를 심도있게 살펴볼 것입니다. 특히, 배열, 딕셔너리, 세트, 튜플 등 컬렉션 타입을 매우 상세하게 소개합니다.
+*/
 
 /*
- struct와 class
- 스위프트는 도대체 왜 밸류 타입인 구조체를 써서 레퍼런스 타입인 클래스를 지원하도록 한 것일까?
- 
- 1. 성능 최적화
- 구조체는 값 타입이므로, 인스턴스를 복사할 때 참조(reference)가 아닌 실제 데이터를 복사합니다. 이는 메모리 관리와 관련된 비용을 줄여 성능을 최적화할 수 있습니다. 특히, 작은 데이터 구조를 빈번히 복사할 때 유리합니다.
- 
- 2. 안전성 강화
- 값 타입은 불변성을 쉽게 구현할 수 있어, 데이터가 예기치 않게 변경되는 것을 방지합니다. 구조체는 데이터 복사 시 독립된 인스턴스를 생성하므로, 데이터 변경이 원본에 영향을 미치지 않습니다.
- 
- 3. 스레드 안전성
- 구조체는 값 타입이므로, 여러 스레드에서 동시에 읽고 쓸 때 발생할 수 있는 경쟁 조건을 피할 수 있습니다. 이는 멀티스레드 환경에서 안전하게 사용할 수 있도록 해줍니다.
- 
- 4. 간결하고 명료한 설계
- 구조체는 단순한 데이터 모델을 구현하는 데 적합합니다. Swift의 많은 기본 데이터 타입(Int, Double, String 등)은 구조체로 구현되어 있어 코드의 간결성과 명료성을 유지할 수 있습니다.
- 
- 구조체가 그렇게 강력하다면, 클래스는 언제 써야하는 것인가? -> 가이드라인에 하나라도 충족 된다면 구조체를 쓰라고 권장한다.
- 1. 특정 타입 생성의 가장 중요한 목적이 간단한 몇 개의 값을 캡슐화하려는 것인 경우
- 2. 캡슐화한 값을 구조체의 인스턴스에 전달하거나 할당할 때 참조가 아닌 복사를 할 경우
- 3. 구조체에 의해 저장되는 프로퍼티를 참조가 아닌 복사를 위한 밸류 타입인 경우
- 4. 기존의 타입에서 가져온 프로퍼티나 각종 기능을 상속할 필요가 없는 경우
- */
+### struct와 class
+스위프트에서는 성능 최적화, 안전성 강화, 스레드 안전성, 간결한 설계를 위해 주로 값 타입인 구조체를 사용합니다. 그러나 특정 상황에서는 클래스가 더 적합할 수 있습니다. 예를 들어, 복사가 아닌 참조를 통해 데이터를 공유해야 하는 경우, 또는 상속이 필요한 경우 클래스가 사용됩니다.
+*/
+
+struct ExampleStruct {
+    var value = "Example"
+}
+
+class ExampleClass {
+    var value = "Example"
+}
+
+let exampleStruct = ExampleStruct()
+let exampleClass = ExampleClass()
+
+// exampleStruct.value = "New Value" // 불가능
+exampleClass.value = "New Value" // 가능
 
 /*
- 동일한 타입의 값만 저장해야 한다 -> 반환될 값의 타입을 명확히 예측 가능, 좀 더 효율적인 코드, 실수의 여지가 좀 더 줄어든다
- 하지만, 동일 배열 내에서 상이한 타입의 값을 사용해야 할 경우 프로토콜의 배열로 정의해서 다양한 타입을 받아들이거나, AnyObject타입의 배열로 정의해야 한다
- ! 스위프트 배열은 클래스가 아닌 구조체로서 정의된다.
- 
- 스위프트에서 배열은 세가지 유형이 있다.
- Array, ContiguousArray, ArraySlice
- 
- 모든 Array 클래스는 배열에 포함된 배열 요소를 저장하기 위한 메모리 공간을 유지한다.
- 배열 요소의 타입이 클래스 또는 @objc 프로토콜 타입이 아닌 경우, 배열의 메모리 영역은 인접 블록에 저장된다.
- 이와 달리, 배열의 요소가 클래스 또는 @objc 타입인 경우 배열의 메모리 영역은 인접 블록에 NSArray의 인스턴스 또는 NSArray의 서브클래스의 인스턴스로 저장된다.
- 
- 기본 배열 요소의 메모리 관리:
- 배열 요소가 클래스가 아니거나 @objc 프로토콜 타입이 아닌 경우, 예를 들어 Int, Double, Struct 등의 타입이면 배열에 포함된 모든 요소들은 메모리에서 인접한 위치에 저장됩니다.
- 이렇게 하면 메모리 접근이 빠르고 효율적입니다.
- 
- 클래스 또는 @objc 타입 배열 요소의 메모리 관리:
- 배열 요소가 클래스 타입이거나 @objc 프로토콜을 준수하는 타입인 경우, 배열에는 이 요소들의 실제 인스턴스가 아닌 참조(포인터)들이 저장됩니다.
- 참조들은 배열 내에서 인접한 위치에 저장되지만, 실제 객체는 메모리의 다른 곳에 있을 수 있습니다.
- 
- 저장하려는 배열 요소가 클래스 또는 @objc 타입인 경우 ContiguosArray 유형을 사용하면 좀 더 효육적인 코드를 작성할 수 있다.
- ContiguosArray는 오브젝티브C와 브릿징을 지원하지 않는다.
- 
- ArraySlice 클래스는 Array, ContiguosArray 혹은 다른 ArraySlice의 속성을 그대로 지닌다. ContiguosArray와 마찬가지로 배열 요소를 저장할 때 인접 메모리 공간을 사용하며,오브젝티브C와 브릿징 되지 않는다.
- ArraySlice의 가장 큰 특징은 이미 존재하는 또 다른 배열 타입의 일부 그룹을 대표한다는 것이다. -> 원본인 배열의 생애주기가 끝나면 ArraySlice에 저장된 배열 요소 역시 접근 불가능 상태가 된다는 점에 주의해야 한다.
- 애플은 ArraySlice 인스턴스를 장시간 유지하지 말도록 권장하고 있다.
- ArraySlice는 배열의 일부를 나타내는 타입으로, 특정한 특성과 제약이 있습니다. 이를 쉽게 풀어서 설명드리겠습니다.
- ArraySlice는 배열의 일부분을 나타내는 타입입니다. 예를 들어, 배열 [1, 2, 3, 4, 5]가 있을 때, 이 배열의 일부를 ArraySlice로 나타낼 수 있습니다.
- let array = [1, 2, 3, 4, 5]
- let slice = array[1...3] // [2, 3, 4]
- 여기서 slice는 array의 일부를 나타냅니다.
- 
- 속성 공유:
- ArraySlice는 Array와 ContiguousArray와 같은 속성을 가지고 있습니다.
- Array와 마찬가지로 인접한 메모리 공간에 요소를 저장합니다.
- 
- Objective-C 브릿징 불가:
- ArraySlice는 Objective-C와 브릿징되지 않습니다. 즉, Objective-C 코드와 직접적으로 호환되지 않습니다.
- 
- 기존 배열의 일부분:
- ArraySlice는 이미 존재하는 배열의 일부를 나타내는 그룹입니다.
- 따라서 원본 배열이 존재하는 동안에만 유효합니다.
- 
- 원본 배열의 생애주기:
- ArraySlice는 원본 배열이 존재하는 동안에만 유효합니다. 원본 배열이 메모리에서 해제되면, ArraySlice도 접근할 수 없게 됩니다.
- var array: [Int]? = [1, 2, 3, 4, 5]
- let slice = array![1...3] // [2, 3, 4]
- array = nil
- // slice에 접근하려고 하면 문제가 발생할 수 있습니다.
- */
+### 스위프트의 배열
+스위프트의 배열은 Array, ContiguousArray, ArraySlice 세 가지 유형이 있습니다. 배열은 값 타입으로, 메모리 효율성이 높습니다. 요소가 클래스나 @objc 타입인 경우 참조가 저장되며, 그렇지 않은 경우 실제 데이터가 인접 메모리 블록에 저장됩니다.
+*/
 
-/* !! 중요
- Array, ContiguosArray, ArraySlice 인스턴스를 생성하면 해당 배열 요소를 저장하기 위한 추가 저장 공간이 할당된다 (왜 굳이.) -> 왜냐면, 이는 배열에 메모르 공간을 재할당 하지 않고 배열 관련 작업을 처리할 수 있을 정도의 잠재적인 저장 공간이라 할 수 있다. (재할당하는 일을 하지 않으려고)
- 배열에 요소가 추가될 때마다 소진된 배열 용량을 자동으로 증가시킨다. -> 배열 요소가 추가 작업을 여러 차례 나눠서 반복적으로 진행할 경우, 각각의 추가 작업에는 일정한 시간이 소요된다 -> 만약, 배열에 대량의 요소가 추가될 것임을 미리 알 수 있는 경우, 추가적인 배열 용량을 미리 할당해 두는 편이 좋다
- -> 이렇게 함으로써 새로운 ㅇ소가 추가될 때마다 배열이 스스로 저장 공간을 할당하는 데 드는 시간을 줄일 수 있다. 예약어는 reserveCapacity
- */
-// 배열을 초기화하고, 배열이 앞으로 저장할 수 있는 요소의 용량을 미리 예약
-// 이는 배열에 요소를 추가할 때 재할당 및 복사 작업이 자주 일어나지 않도록 하기 위해 사용됩니다.
-var manyElementArr = Array<Int>()
-manyElementArr.reserveCapacity(500) // 508개의 요소를 미리 포함 -> 500아님 508임, 스위프트가 실행 성능을 고려해서 실제 요청한 양 이상을 할당한 것, 최소한 예약한 배열 용량만큼은 확보할 수 있다.
-manyElementArr
+var intArray = [Int]()
+intArray.reserveCapacity(500)
 
 /*
- 딕셔너리: 동일한 데이터 타입이 키와 값 쌍으로 묶여 있는 무순위 컬렉션, 순위를 별도로 지정할 수 없다.
- */
-var mydict1 = Dictionary<Int,String>()
-var mydict2 =  [String:Int]()
+### 딕셔너리
+딕셔너리는 키-값 쌍으로 이루어진 무순위 컬렉션입니다. 키와 값은 동일한 타입을 가져야 하며, 키는 유일해야 합니다. 딕셔너리는 키를 통해 값을 효율적으로 조회, 추가, 업데이트할 수 있습니다.
+*/
+
+var myDictionary: [String: Int] = ["one": 1, "two": 2]
+myDictionary["three"] = 3
+myDictionary.updateValue(4, forKey: "four")
+myDictionary.removeValue(forKey: "one")
 
 /*
- 새로운 키/값 쌍추가, 변경, 삭제
- updateValue() 메소드 또는 서브스크립트 문법을 사용할 수 있다. -> 키가 존재하지 않는 경우 추가, 존재하는 경우 업데이트 된다.
- 삭제의 경우 removeValue(forKey: ) 메소드에서 삭제하려는 값의 키를 입력하거나, 서브스크립트 문법에서 키에 nil을 전달한다: mydict2["key"] = nil
- */
+### 세트
+세트는 중복되지 않고 순서가 없는 유일한 값들의 컬렉션입니다. 세트는 Hashable 프로토콜을 준수하는 타입만 저장할 수 있습니다. 세트는 배열보다 데이터 접근 속도가 빠릅니다.
+*/
+
+var mySet: Set<Int> = [1, 2, 3]
+mySet.insert(4)
+mySet.remove(2)
 
 /*
- 딕셔너리에서 값 가져오기
- 서브스크립트를 통해 특정 키/깂 쌍을 가져올 수 있다.
- 해당 키가 딕셔너리에 존재하지 않을 경우, 서브스크립트 옵셔널을 반환한다
- 
- 딕셔너리를 분회하며 명시적으로 키/값을 분할해서 사용할수 있는 튜플을 반환할 수 도 있다.
- 예시
- */
+### 튜플
+튜플은 하나 이상의 데이터를 함께 묶어주는 컬렉션 타입입니다. 서로 다른 타입의 요소를 가질 수 있으며, 순회는 불가능합니다.
+*/
+
+let myTuple = (1, "Swift", true)
+let (number, language, isAwesome) = myTuple
 
 /*
- 딕셔너리는 기본적으로 무순위 컬렉션이다. 그러나, 가끔 딕셔너리를 순회하며 순위 목록으로 정돈해야 할 경우 -> sort() 메소드를 이용한다.
- */
-let sortedDic = ["AL": "Alabam", "CA":"California","Ak": "Alaska"].sorted {$0.0 < $1.0}
-sortedDic
+### 서브스크립트
+서브스크립트는 컬렉션 타입의 요소에 접근하기 위한 특별한 방법입니다. 클래스, 구조체, 열거형에서 서브스크립트를 정의하여 배열처럼 인덱스를 통해 값을 가져오거나 설정할 수 있습니다.
+*/
+
+class MovieList {
+    private var tracks = ["war", "dark knight", "hello"]
+    
+    subscript(index: Int) -> String {
+        get {
+            return tracks[index]
+        }
+        set(newValue) {
+            tracks[index] = newValue
+        }
+    }
+}
+
+let myMovieList = MovieList()
+print(myMovieList[1]) // "dark knight"
+myMovieList[1] = "inception"
+print(myMovieList[1]) // "inception"
+
+/*
+### 디스패치 기법
+스위프트는 정적 디스패치와 동적 디스패치를 지원합니다. 정적 디스패치는 컴파일 시점에 메소드를 결정하여 빠른 성능을 제공하며, 동적 디스패치는 런타임에 메소드를 결정하여 유연성을 제공합니다. @objc 키워드를 사용하면 동적 디스패치가 강제됩니다.
+*/
+
+import Foundation
+
+class DispatchExample {
+    func staticMethod() {
+        print("Static Dispatch")
+    }
+    
+    @objc dynamic func dynamicMethod() {
+        print("Dynamic Dispatch")
+    }
+}
+
+let instance = DispatchExample()
+instance.staticMethod()  // 정적 디스패치
+instance.dynamicMethod() // 동적 디스패치
+
+/*
+### 스위프트와 오브젝티브C의 호환성
+스위프트는 오브젝티브C와의 호환성을 유지하기 위해 다양한 기능을 제공합니다. 스위프트는 @objc 속성을 통해 오브젝티브C 코드와 상호작용할 수 있습니다. 이는 오브젝티브C의 동적 디스패치 방식을 사용하게 하며, 런타임에 메소드를 동적으로 호출할 수 있게 합니다.
+*/
+
+@objc class ObjectiveCClass: NSObject {
+    @objc func exampleMethod() {
+        print("Objective-C Method")
+    }
+}
+
+let objCInstance = ObjectiveCClass()
+objCInstance.exampleMethod()
+
+/*
+### 실패 가능 초기화
+스위프트는 초기화 중 실패할 가능성을 처리하기 위해 실패 가능 초기화(init?)를 제공합니다. 이는 초기화가 실패할 수 있는 상황에서 유용합니다.
+*/
+
+struct FailableInitStruct {
+    var value: String
+    
+    init?(value: String) {
+        if value.isEmpty {
+            return nil
+        }
+        self.value = value
+    }
+}
+
+if let instance = FailableInitStruct(value: "Hello") {
+    print(instance.value) // "Hello"
+} else {
+    print("Initialization failed")
+}
+
+/*
+### 컬렉션 클래스 브릿징
+스위프트는 NSArray, NSDictionary, NSSet 등의 오브젝티브C 컬렉션 클래스와 자동으로 브릿징됩니다. 이를 통해 스위프트와 오브젝티브C 코드 간의 원활한 데이터 전송이 가능합니다.
+*/
+
+let swiftArray: [String] = ["one", "two", "three"]
+let nsArray: NSArray = swiftArray as NSArray
+print(nsArray) // ("one", "two", "three")
+
+/*
+### 프로토콜 작성 문법
+프로토콜은 메소드, 프로퍼티, 연관 타입 등을 선언하는 청사진 역할을 합니다. 프로토콜을 통해 공통의 인터페이스를 정의하고, 이를 채택하는 타입에서 해당 인터페이스를 구현할 수 있습니다.
+*/
+
+protocol ExampleProtocol {
+    var description: String { get }
+    func doSomething()
+}
+
+extension ExampleProtocol {
+    func doSomething() {
+        print("Doing something")
+    }
+}
+
+struct ExampleStruct: ExampleProtocol {
+    var description: String {
+        return "Example Struct"
+    }
+}
+
+let example = ExampleStruct()
+example.doSomething() // "Doing something"
+
+/*
+### 타입으로서의 프로토콜
+프로토콜은 타입으로도 사용할 수 있습니다. 이를 통해 특정 프로토콜을 준수하는 객체를 타입으로 받아들이는 함수나 메소드를 정의할 수 있습니다.
+*/
+
+protocol AnotherExampleProtocol {
+    func exampleMethod()
+}
+
+struct AnotherStruct: AnotherExampleProtocol {
+    func exampleMethod() {
+        print("Example Method")
+    }
+}
+
+func takeProtocolType(param: AnotherExampleProtocol) {
+    param.exampleMethod()
+}
+
+let anotherExample = AnotherStruct()
+takeProtocolType(param: anotherExample) // "Example Method"
+
+/*
+### 프로토콜 익스텐션
+프로토콜 익스텐션을 통해 프로토콜에 기본 구현을 제공할 수 있습니다. 이를 통해 프로토콜을 채택한 모든 타입에 공통 기능을 제공할 수 있습니다.
+*/
+
+protocol DefaultMethodProtocol {
+    func requiredMethod()
+}
+
+extension DefaultMethodProtocol {
+    func requiredMethod() {
+        print("Default Implementation")
+    }
+}
+
+struct DefaultImplementationStruct: DefaultMethodProtocol {}
+let defaultImpl = DefaultImplementationStruct()
+defaultImpl.requiredMethod() // "Default Implementation"
+
+/*
+### 열거형 배열 만들기
+열거형은 관련된 값들을 묶어서 사용하기 위한 타입입니다. 배열과 결합하여 다양한 형태로 활용할 수 있습니다.
+*/
+
+enum Direction {
+    case north, south, east, west
+}
+
+var directions: [Direction] = [.north, .south, .east, .west]
+directions.append(.north)
