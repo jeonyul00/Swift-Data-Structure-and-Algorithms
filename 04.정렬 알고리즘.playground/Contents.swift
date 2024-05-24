@@ -41,18 +41,19 @@ print(insertList)
  3. 결합: S1과 S2의 하위 목록을 병합해서 정렬된 시퀀스로 만든 귀 이를 다시 반환한다.
  */
 
-func mergeSort<T:Comparable>(_ list: [T])-> [T] {
+// 배열 기반 병합 정렬
+func arrMergeSort<T:Comparable>(_ list: [T])-> [T] {
     guard list.count > 1 else { return list }
     
     let mid = list.count / 2
-    return merge(mergeSort([T] (list[0..<mid])), rightHalf: mergeSort([T] (list[mid..<list.count])))
+    return merge(arrMergeSort([T] (list[0..<mid])), rightHalf: arrMergeSort([T] (list[mid..<list.count])))
 }
 
 func merge<T:Comparable>(_ leftHalf: [T], rightHalf: [T]) -> [T] {
     var leftIndex = 0
     var rightIndex = 0
     var tempList = [T]()
-    tempList.reserveCapacity(leftHalf.count + rightHalf.count)
+    tempList.reserveCapacity(leftHalf.count + rightHalf.count) // 용량 예약, 이건 전 챕터에서 왜 이렇게 하는지 배움
     
     while (leftIndex < leftHalf.count && rightIndex < rightHalf.count) {
         if leftHalf[leftIndex] < rightHalf[rightIndex] {
@@ -72,3 +73,89 @@ func merge<T:Comparable>(_ leftHalf: [T], rightHalf: [T]) -> [T] {
     tempList += [T] (rightHalf[rightIndex ..< rightHalf.count])
     return tempList
 }
+
+// 링크드리스트 기반 병합 정렬
+class Node<T> {
+    var value: T
+    var next: Node?
+    
+    init(value: T) {
+        self.value = value
+    }
+}
+
+class LinkedList<T: Comparable> {
+    var head: Node<T>?
+    
+    func append(value: T) {
+        let newNode = Node(value: value)
+        if let lastNode = head {
+            var currentNode = lastNode
+            while let next = currentNode.next {
+                currentNode = next
+            }
+            currentNode.next = newNode
+        } else {
+            head = newNode
+        }
+    }
+}
+func linkedMergeSort<T: Comparable>(list: inout LinkedList<T>) {
+    list.head = mergeSort(node: list.head)
+}
+
+private func mergeSort<T: Comparable>(node: Node<T>?) -> Node<T>? {
+    guard let node = node, node.next != nil else {
+        return node
+    }
+    
+    let (left, right) = split(node)
+    let leftSorted = mergeSort(node: left)
+    let rightSorted = mergeSort(node: right)
+    return merge(left: leftSorted, right: rightSorted)
+}
+
+private func split<T: Comparable>(_ node: Node<T>) -> (Node<T>?, Node<T>?) {
+    var fast = node
+    var slow: Node<T>? = node
+    var prev: Node<T>? = nil
+    
+    while fast.next != nil && fast.next?.next != nil {
+        fast = fast.next!.next!
+        prev = slow
+        slow = slow?.next
+    }
+    
+    let middle = slow?.next
+    slow?.next = nil
+    
+    return (node, middle)
+}
+
+private func merge<T: Comparable>(left: Node<T>?, right: Node<T>?) -> Node<T>? {
+    let dummyHead = Node(value: 0 as! T)
+    var current: Node<T>? = dummyHead
+    
+    var left = left
+    var right = right
+    
+    while let l = left, let r = right {
+        if l.value < r.value {
+            current?.next = l
+            left = l.next
+        } else {
+            current?.next = r
+            right = r.next
+        }
+        current = current?.next
+    }
+    
+    current?.next = left ?? right
+    
+    return dummyHead.next
+}
+
+/*
+ 신속 정렬(퀵소트)
+ 신속 정렬 역시 분리 정복 알고리즘의 일종이다.
+ */
