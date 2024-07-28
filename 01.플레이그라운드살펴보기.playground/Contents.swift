@@ -16,5 +16,51 @@ class LinkedList<T> {
 
 /*
     밸류 타입과 레퍼런스 타입
-    
+
+    밸류 타입: 오직 하나의 소유 객체만을 지니며, 해당 타입의 데이터가 변수 또는 상수에 할당 됐을 때 혹은 함수에 전달됐을 때, 지니고 있던 값을 복사한다. struct와 enum 두가지 유형이 있으며 스위프트의 모든 데이터 타입은 기본적으로 구조체(struct)이다.
+    레퍼런스 타입: 값을 복사하지 않고 공유한다. 즉 레퍼런스 타입은 변수에 할당하거나 함수에 전달할 때 값을 복사해서 제공하는 대신, 동일한 인스턴스를 참조값을 활용한다. 레퍼런스 타입은 여러 개의 소유 객체가 참조라는 방식으로 공유할 수 있다.
+ 
+    여기서 중요한 점은 이들 데이터 타입(int, double, string character etc)은 다른 언어에서와 같은 원천 데이터 타입이 아니다!
+    이들은 스위프트 표준 라이브러리에서 구조체 타입으로 정의되고 구현된 기명타입이다!
  */
+
+struct ValueStruct {
+    var typeValue: Int = 1
+}
+
+var copyStruct = ValueStruct()
+var copyStruct2 = copyStruct
+
+
+copyStruct.typeValue = 2
+copyStruct2.typeValue // 1
+copyStruct.typeValue // 2
+
+class RefrClass {
+    var typeRef: Int = 1
+}
+
+var copyRef = RefrClass()
+var copyRef2 = copyRef
+
+copyRef.typeRef = 2
+copyRef2.typeRef // 2
+copyRef.typeRef // 2
+
+/*
+    기명 타입과 복합 타입
+    
+    기명 타입: 사용자가 정의할 수 있는 데이터 타입, 해 당 타입이 정의 될 때 특정한 이름을 부여할 수 있는 타입 클래스 구조체 열거형 프로토 타입도 있고 이 외에 스위프트 라이브러리에는 배열, 딕셔너리, 셋, 옵셔널 값을 나타낼 수 있는 기명 타입이 별도로 마련되어 있다. -> 기명 타입은 익스텐션 선언을 통해 동작 범위를 확장 할 수 있다.
+    복합 타입: 별도의 이름이 붙여지지 않은 타입, function, type 등 두개의 복합 타입이 정의돼 있다. 복합 타입은 기명 타입은 물론 또 다른 복합 타입을 포함 할 수 있다. ex) (Int, (Bool, String))
+ */
+
+
+/*
+    type alias: 어떤 작업을 진행 중일 때, 특정 "타입"의 이름을 좀 더 해당 작업 또는 임무의 맥락 또는 분위기가 반영된 새로운 이름으로 부르고 싶을 때 사용
+ */
+
+typealias ageType = Int
+typealias nameType = String
+
+let human:(nameType, ageType) = ("jeonyul", 30)
+
