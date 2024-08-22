@@ -1,5 +1,5 @@
 import UIKit
-
+import Foundation
 /*
     스위프트의 표준 라이브러리를 살펴보자.
  */
@@ -174,3 +174,86 @@ if let nsArr4: [Int] = nsArr2 as? [Int] {
 /*
     파라미터화된 타입으로 NSDictionary를 브릿징하면 [ObjectType] 타입의 딕셔너리가 만들어지고, 별도의 파라미터 타입을 지정하지 않고 브릿징하면 [NSObject: AnyObject] 딕셔너리가 만들어진다.
  */
+
+/*
+    스위프트에서는 클래스를 사용하지 않고 프로토콜만으로 프로그램을 작성할 수 있다.
+    스위프트 프로토콜은 메소드, 프로퍼티, 연관 타입과 특정 타입을 지저원하기 위한 타입 에일리어스 등으로 구성된 목록이다.
+    자바, C#, 또는 Go 같은 언어에서의 프로토콜은 인터페이스라는 이름으로 부른다.
+ */
+
+/*
+    명령 전달을 위한 디스패치 기법
+    스위프트의 프로토콜은 오브젝티브C 프로토콜의 슈퍼셋이다.
+ */
+
+// 만약 구조체의 멤버 변수가 변경될 수 있다면 mutating을 붙인다.
+// 프로토콜은 하나 혹은 그 이상의 다른 프로토콜을 상속할 수 있다.
+// 여러개의 프로토콜을 프로토콜 컴포지션으로 묶어서 하나처럼 사용할 수 있다.
+protocol Particle {
+    var name: String { get } // get인지 set인지 둘 다인지 명확하게 밝혀야 한다.
+    func particleAsImage() -> NSObject
+}
+
+protocol ProtocolA {
+    func methodA()
+}
+
+protocol ProtocolB {
+    func methodB()
+}
+
+// ProtocolA와 ProtocolB를 컴포지션으로 묶어서 사용
+func someFunction(object: ProtocolA & ProtocolB) {
+    object.methodA()
+    object.methodB()
+}
+
+/*
+    타입으로서의 프로토콜
+    프로토콜을 이용해서 뭔가를 직접 구현하지 않더라도, 타입이 필요한 곳에 프로토콜을 하나의 타입으로서 사용할 수 있다. 대략적인 용도는 다음과 같다.
+    1. 함수, 메소드, 초기화 객체에서 반환 타입 또는 파라미터 타입
+    2. 배열, 세트, 딕셔너리에서 개별 아이템 타입
+    3. 변수, 상수, 프로퍼티의 타입
+ */
+
+// 1
+protocol Drivable {
+    func drive()
+}
+
+func startDriving(vehicle: Drivable) {
+    vehicle.drive()
+}
+
+// 2
+var vehicles: [Drivable] = []
+
+// vehicles.append(Car())
+// vehicles.append(Bike())
+
+// 3
+var myVehicle: Drivable
+
+// myVehicle = Car()
+// myVehicle = Bike()
+
+/*
+    프로토콜 익스텐션
+    소스 코드 작성자가 아니더라도 기존의 프로토콜의 기능을 확장할 수 있다. 익스텐션을 통해 기존 프로토콜에 새로운 메소드, 프로퍼티, 서브스크립트를 추가할 수 있다.
+ */
+
+extension Collection {
+    func yulEncryptElements(salt: String) -> [Iterator.Element] {
+        guard !salt.isEmpty else { return [] }
+        guard self.count > 0 else { return [] }
+        
+        var index = self.startIndex
+        var result: [Iterator.Element] = []
+        repeat {
+            let el = self[index]
+            result.append(el)
+            index = index.successor()
+        } while (index != self.endIndex)
+        return result
+    }
+}
