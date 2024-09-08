@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 
 /*
  반복기, 시퀀스, 컬렉션 프토토콜에 부합하는 커스텀 컬렉션 타입을 만들면 네이티브 스위프트 컬력션 타입과 마찬가지로 서브스크립트나 for in 순환문을 통해 개별 요소에 접근 가능하다.
@@ -89,4 +90,34 @@ public struct Queue<T> {
         get { return data.capacity }
         set { data.reserveCapacity(newValue) }
     }
+    public func isFull() -> Bool {
+        return data.count == data.capacity
+    }
 }
+
+/*
+    순환 버퍼
+    버퍼의 시작 부분을 연결해주는 헤드 인덱스, 테일인덱스 등 두개의 인덱스를 사용하는 고정 크기의 데이터 구조
+    버퍼가 데이터로 꽉 차면 헤드 인덱스는 0으로 되돌아 간다. 순환 버퍼는 지정된 용량까지 데이터를 받아들이고, 기존의 데이터는 새로운 데이터로 대체된다.
+    순환 버퍼는 특히 FIFO 데이터 구조를 표현할 때 유용하다. 큐 데이터와 구조와 비슷 <-> 순환버퍼는 헤드인덱스와 테일인덱스가 맞물려있다.
+ 
+    크기가 고정되어 있으므로, 새로운 데이터로 교체될 기존 데이터로 항상 가득 차 있는 상태다. 또 크기가 고정돼 있기 때문에 내부적으로 데이터를 저장할 때 배열 데이터 구조보다 훨씬 효율적이다.
+    버퍼의 크기를 빈번하게 조절해야 할 경우, 배열 대신 연결 목록으로 순환 버퍼를 구현하는 것이 낫다.
+ */
+
+/// 이 구조 다시 공부하기.
+//public struct CircularBuffer<T> {
+//    fileprivate var data:[T]
+//    fileprivate var head: Int = 0
+//    fileprivate var tail: Int = 0
+//    
+//    private var internalCount: Int = 0
+////    private var overwriteOperation: CircularBufferOperation = CircularBufferOperation.Overwrite
+//    
+//}
+
+
+/*
+
+ */
+//... 우선순위큐, 스택리스트
