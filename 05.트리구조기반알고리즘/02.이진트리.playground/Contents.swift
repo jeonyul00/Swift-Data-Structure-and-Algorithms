@@ -97,47 +97,171 @@ rootNode.insertNodeFromRoot(7)
 rootNode.insertNodeFromRoot(12)
 rootNode.insertNodeFromRoot(17)
 
-print(rootNode)
 
 
-//
-//class Node<T:Comparable> {
-//    var value: T
-//    var left: Node?
-//    var right: Node?
-//    var parent: Node?
-//    
-//    
-//    init(value: T, left: Node? = nil, right: Node? = nil, parent: Node? = nil) {
-//        self.value = value
-//        self.left = left
-//        self.right = right
-//        self.parent = parent
-//    }
-//
-//    
-//    public func guardInsert(_ value:T){
-//        if self.parent != nil { return }
-//        insert(value)
-//    }
-//    
-//    private func insert(_ value:T) {
-//        // 왼쪽으로
-//        if value < self.value {
-//            // 왼쪽 노드가 있냐없냐
-//            if let leftChild = left {
-//                leftChild.insert(value)
-//            } else {
-//                // 왼쪽에서 노드를 하나 새로만들어야지.
-//                let newNode = Node(value: value)
-//                newNode.parent = self
-//                self.left = newNode
-//            }
-//        } else {
-//            // 큰 수 오른쪽
-//        }
-//        
-//    }
-//    
-//    
-//}
+// 트리 워크(순회)
+/*
+ 인오더 트리 워크
+ 이진 검색 트리의 속성에 따라 인오더 트리 워크, 인오더 트래버설이라는 이름의 알고리즘으로 트리 내부의 노드를 순회할 수 있다.
+ 인오더 트리 워크를 하고 하면 오름차순으로 정렬된 트리 노드의 값이 목록으로 반환된다.
+ 인오더 트리 워크는 다음 순서에 따라 루트 노드에 속한 각각의 서브 트리를 재귀적으로 방문한다.
+ 
+ 좌측 서브 트리 -> 루트 노드 -> 우측 서브 트리
+ 좌측 < 루트 노드 < 우측
+ 이런 이유로, 인오더 트리 워크의 결과값은 오름차순으로 정돈된 시퀀스가 된다.
+ */
+
+
+// 인오더 트리 워크
+extension BinaryTreeNode {
+    // 재귀적으로 노드를 순회하는 인오더 트리 워크
+    public class func traverseInOrder(node:BinaryTreeNode?) {
+        // nil인 잎에 도달하면 재귀적인 함수 호출이 중단됨
+        guard let node = node else { return }
+        
+        // leftChild에서 재귀적으로 메소드 호출 후에 rightChild로 이동
+        BinaryTreeNode.traverseInOrder(node: node.leftChild)
+        print(node.value)
+        BinaryTreeNode.traverseInOrder(node: node.rightChild)
+        
+    }
+}
+
+BinaryTreeNode.traverseInOrder(node: rootNode)
+
+/*
+ 프리 오더 트리 워크
+ 루트 노드 -> 좌측 서브트리 -> 우측 서브트리
+ */
+extension BinaryTreeNode {
+    public class func traverseInOrder2(node:BinaryTreeNode?) {
+        guard let node = node else { return }
+        print(node.value)
+        BinaryTreeNode.traverseInOrder2(node: node.leftChild)
+        BinaryTreeNode.traverseInOrder2(node: node.rightChild)
+        
+    }
+}
+
+BinaryTreeNode.traverseInOrder2(node: rootNode)
+
+/*
+ 포스트오더 트리 워크
+ 좌측 서브 트리 -> 우측 서브 트리 -> 루트 노드
+ */
+
+extension BinaryTreeNode {
+    public class func traverseInOrder3(node:BinaryTreeNode?) {
+        guard let node = node else { return }
+        
+        BinaryTreeNode.traverseInOrder3(node: node.leftChild)
+        BinaryTreeNode.traverseInOrder3(node: node.rightChild)
+        print(node.value)
+    }
+}
+
+
+
+/*
+ 탐색, 검색
+ 노드에 포함돼 있는 값을 키로 삼아서 특정 노드를 검색할 수 있는 메소드를 구현한다.
+ 만일, 그런 값이 없다면 옵셔널 객체 내에서 nil을 반환하도록 한다.
+ */
+
+extension BinaryTreeNode {
+    func search(value:T) -> BinaryTreeNode? {
+        // 키 값을 찾은 경우
+        if value == self.value {
+            return self // 결국 얘가 나감
+        }
+        
+        // 해당 키 값이 현재 노드의 키 값보다 작은 경우
+        // 좌측 서브트리에서 재귀적으로 검색을 시작
+        // 그렇지 않은 경우 우측 서브트리에서 검색 시작
+        if value < self.value {
+            guard let left = leftChild else { return nil }
+            return left.search(value: value)
+        } else {
+            guard let right = rightChild else { return nil }
+            return right.search(value: value)
+        }
+    }
+}
+
+/*
+ 삭제
+ 삭제의 경우 그에 따르는 다양한 상황을 미리 구체적으로 알고 있어야하기 때문에 삽입, 검색에 비해 훨씬 까다롭다.
+ 
+ 이진 트리에서 노드 삭제의 세 가지 주요 경우:
+ 삭제할 노드가 자식이 없는 경우 (leaf node): 그냥 부모와의 연결을 끊으면 됨.
+ 삭제할 노드가 하나의 자식만 있는 경우: 삭제된 노드의 부모와 자식을 직접 연결해야 함.
+ 삭제할 노드가 두 자식을 모두 가지고 있는 경우: 오른쪽 서브트리에서 최소값을 찾아서 그 노드와 삭제할 노드를 교환한 후, 교환한 노드를 삭제.
+ */
+
+
+// 노드 삭제
+extension BinaryTreeNode {
+    public func delete() {
+        if let left = leftChild {
+            if let _ = rightChild {
+                // 대상 노드가 좌우측 두개의 자식 요소를 모두 지닌 경우 -> 후손 교환 작업 실행
+                self.exchangeWithSuccessor()
+            } else {
+                // 대상 노드가 좌측 자식 요소를 지닌 경우 -> 대상 노드의 self.parent와 self.child를 바로 연결함
+                self.connectParentTo(child:left)
+            }
+        } else if let right = rightChild {
+            self.connectParentTo(child:right)
+        } else {
+            self.connectParentTo(child:nil)
+        }
+        
+        // 참조값 삭제
+        self.parent = nil
+        self.leftChild = nil
+        self.rightChild = nil
+    }
+    
+    // 삭제 대상 노드의 후손을 위해 노드 교환 실행
+    private func exchangeWithSuccessor() {
+        guard let right = self.rightChild, let left = self.leftChild else { return }
+        
+        let successor = right.minimum()
+        
+        successor.delete()
+        successor.leftChild = left
+        left.parent = successor
+        
+        if right !== successor {
+            successor.rightChild = right
+            right.parent = successor
+        } else {
+            successor.rightChild = nil
+        }
+        self.connectParentTo(child:successor)
+    }
+    
+    // 부모와 자식을 연결하는 함수
+    private func connectParentTo(child: BinaryTreeNode?) {
+        guard let parent = self.parent else {
+            child?.parent = self.parent
+            return
+        }
+        if parent.leftChild === self {
+            parent.leftChild = child
+            child?.parent = parent
+        } else {
+            parent.rightChild = child
+            child?.parent = parent
+        }
+    }
+    
+    // 오른쪽 서브트리에서 가장 작은 노드 찾기
+    public func minimum() -> BinaryTreeNode {
+        var node = self
+        while let next = node.leftChild {
+            node = next
+        }
+        return node
+    }
+}
